@@ -1,7 +1,7 @@
 ﻿using System;
-namespace TcpServer
+namespace TcpServer.Model
 {
-    public class Config
+    public class SocketConfig
     {
         /// <summary>
         /// 接收延迟
@@ -14,7 +14,7 @@ namespace TcpServer
         /// <summary>
         /// 当前的配置
         /// </summary>
-        public Config()
+        public SocketConfig()
         {
         }
     }

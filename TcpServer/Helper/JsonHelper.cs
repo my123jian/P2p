@@ -2,8 +2,11 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace TcpServer
+namespace TcpServer.Helper
 {
+    /// <summary>
+    /// json序列化帮助类
+    /// </summary>
     public static class JsonHelper
     {
 

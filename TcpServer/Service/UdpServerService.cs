@@ -4,13 +4,11 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Threading.Tasks;
+using TcpServer.Model;
 
-namespace TcpServer
+namespace TcpServer.Service
 {
-    /// <summary>
-    /// 当前的服务端处理逻辑
-    /// </summary>
-    public class ServerService
+    public class UdpServerService:ServerServiceBase
     {
         /// <summary>
         /// 最大支持1000人同时使用
@@ -57,14 +55,14 @@ namespace TcpServer
         /// </summary>
         private int ReceiveThreadCount = 0;
 
-        public ServerService(Config config)
+        public UdpServerService(SocketConfig config)
         {
 
         }
         /// <summary>
         /// 配置服务初始化
         /// </summary>
-        public ServerService()
+        public UdpServerService()
         {
             this.InitServerSocker();
             this.initKeepWatchThread();
@@ -91,9 +89,9 @@ namespace TcpServer
                 this.CheckValidSocket();
                 Console.WriteLine(string.Format("发送线程总数:{0},接收的线程总数:{1}", this.SendThreadCount, this.ReceiveThreadCount));
                 //一秒钟检查一次
-                System.Threading.Thread.Sleep(1000*5);
+                System.Threading.Thread.Sleep(1000 * 5);
 
-                
+
             }
         }
         /// <summary>
@@ -117,8 +115,8 @@ namespace TcpServer
                 this.theClientSockets = theValidList;
                 Console.WriteLine("当前有效连接数量 :" + theValidNum);
             }
-           
-            
+
+
         }
         #endregion
         /// <summary>
@@ -130,12 +128,12 @@ namespace TcpServer
         {
             IPAddress ipAddress = IPAddress.Parse(Address);
             IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, Port);
-            this.theServiceSocket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+            this.theServiceSocket = new Socket(AddressFamily.InterNetwork, SocketType.Dgram, ProtocolType.Udp);
             //绑定ip和端口  
             this.theServiceSocket.Bind(ipEndPoint);
             //设置最长的连接请求队列长度
             Console.WriteLine("绑定端口成功！");
-            this.theServiceSocket.Listen(10);
+            //this.theServiceSocket.Listen(10);
             Thread thread = new Thread(this.ListenThread);
             thread.Start();
             //this.ListenThread();
@@ -144,14 +142,18 @@ namespace TcpServer
         /// <summary>
         /// 当前的监听的线程
         /// </summary>
-        private  void ListenThread()
+        private void ListenThread()
         {
             while (IsStop == false)
             {
                 Console.WriteLine("开始接收连接！");
-                var theClientSocket =  this.theServiceSocket.Accept();
+                //var theClientSocket = this.theServiceSocket.ReceiveFrom(;
+                EndPoint point = new IPEndPoint(IPAddress.Any, 0);
+               byte[] buffer = new byte[1024];
+                int length = theServiceSocket.ReceiveFrom(buffer, ref point);//接收数据报
                 Console.WriteLine("接收到一个客户端的连接！");
-                this.InitClientSocket(theClientSocket);
+                Console.WriteLine(string.Format("{0},{1}",((IPEndPoint)point).Address, ((IPEndPoint)point).Port));
+                //this.InitClientSocket(theClientSocket);
             }
         }
 
@@ -159,12 +161,12 @@ namespace TcpServer
         /// 初始化客户端的连接 获取对应的信息并给指定的线程进行处理 
         /// </summary>
         /// <param name="theClientSocket"></param>
-        private  void InitClientSocket(Socket theClientSocket)
+        private void InitClientSocket(Socket theClientSocket)
         {
-          
+
             IPEndPoint theRemoteEndPoint = (IPEndPoint)theClientSocket.RemoteEndPoint;
 
-            theClientSocket.ReceiveTimeout = 1000*60;
+            theClientSocket.ReceiveTimeout = 1000 * 60;
             theClientSocket.SendTimeout = 1000 * 60;
             //var theMessage=theClientSocket.ReceiveMessage();
             //Console.WriteLine(theMessage);
@@ -178,7 +180,7 @@ namespace TcpServer
             {
                 this.theClientSockets.Add(theClientSocket);
                 //this.theTodoSocket.Enqueue(theClientSocket);
-               
+
             }
             //开启一个线程进行处理
             this.InitClientSocketThread(theClientSocket);
@@ -210,11 +212,11 @@ namespace TcpServer
             if (theClientSocket != null)
             {
                 IPEndPoint theRemoteEndPoint = (IPEndPoint)theClientSocket.RemoteEndPoint;
-                theClientSocket.SendMessage(theRemoteEndPoint.Port+"");
+                theClientSocket.SendMessage(theRemoteEndPoint.Port + "");
                 //theClientSocket.SendCommand(ResponseCommand.New().SetIpAddress(theRemoteEndPoint.Address.ToString()).SetPort(theRemoteEndPoint.Port));
                 Console.WriteLine("发送消息完成!");
             }
-           
+
         }
 
         /// <summary>
@@ -233,7 +235,7 @@ namespace TcpServer
                     var theMessage = theClientSocket.ReceiveMessage();
                     Console.WriteLine("接收到消息: " + theMessage);
                     Console.WriteLine("send消息: " + theMessage);
-                    theClientSocket.SendMessage(theRemoteEndPoint.Address+":"+theRemoteEndPoint.Port + "");
+                    theClientSocket.SendMessage(theRemoteEndPoint.Address + ":" + theRemoteEndPoint.Port + "");
                     Console.WriteLine("send消息: " + theMessage);
                     // theClientSocket.ReceiveAsync(theRemoteEndPoint.Port + "");
                     if (hasReceive == false)
@@ -264,7 +266,7 @@ namespace TcpServer
                 Console.WriteLine("向客户端发送消息!");
                 theNewSocket.Close();
             });
-           
+
         }
         /// <summary>
         ///  释放实例
@@ -284,6 +286,5 @@ namespace TcpServer
                 this.theServiceSocket.Close();
             }
         }
-      
     }
 }
