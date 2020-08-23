@@ -156,5 +156,10 @@ namespace TcpServer
 
             }
         }
+
+        private void ConnectNat(Socket theSocket)
+        {
+            theSocket.Connect("", 80);
+        }
     }
 }
