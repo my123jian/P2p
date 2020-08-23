@@ -26,10 +26,7 @@ namespace TcpServer.Service
         /// 监控线程 用于监控防止死掉
         /// </summary>
         private Thread keepWatchThread = null;
-        /// <summary>
-        /// 服务端口
-        /// </summary>
-        private Socket theServiceSocket = null;
+     
         /// <summary>
         /// 监听线程
         /// </summary>
@@ -79,6 +76,7 @@ namespace TcpServer.Service
             this.keepWatchThread.Start();
         }
 
+
         /// <summary>
         /// 监控线程处理逻辑
         /// </summary>
@@ -86,27 +84,38 @@ namespace TcpServer.Service
         {
             while (IsStop == false)
             {
-                //10秒钟检查一次连接是否成功
-                this.CheckValidSocket();
-                Console.WriteLine(string.Format("发送线程总数:{0},接收的线程总数:{1}", this.SendThreadCount, this.ReceiveThreadCount));
-                //一秒钟检查一次
-                System.Threading.Thread.Sleep(1000 * 5);
-
-
+                try
+                {
+                    //10秒钟检查一次连接是否成功
+                    this.CheckValidSocket();
+                    Console.WriteLine(string.Format("发送线程总数:{0},接收的线程总数:{1}", this.SendThreadCount, this.ReceiveThreadCount));
+                    //5秒钟检查一次
+                    System.Threading.Thread.Sleep(1000 * 5);
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
             }
         }
 
-
-
-
+        /// <summary>
+        /// 处理服务端的连接
+        /// </summary>
+        /// <param name="theClientSocket"></param>
         protected override void HandleConect(Socket theClientSocket)
         {
             base.HandleConect(theClientSocket);
+            this.InitClientSocketThread(theClientSocket);
 
         }
+        /// <summary>
+        /// 处理单个客户端的连接
+        /// </summary>
+        /// <param name="theClientSocket"></param>
         private void InitClientSocketThread(Socket theClientSocket)
         {
-
+            
             //开启一个线程进行处理
             Task.Factory.StartNew(() => {
                 this.ReceiveThreadCount += 1;
@@ -115,6 +124,32 @@ namespace TcpServer.Service
                 this.ReceiveThreadCount -= 1;
             });
         }
+
+       
+        /// <summary>
+        /// 客户端接收消息处理
+        /// </summary>
+        /// <param name="theSocket"></param>
+        private void RunReceiveClientThread(Socket theSocket)
+        {
+            var theClientSocket = theSocket;
+            if (theClientSocket != null)
+            {
+                while (true)
+                {
+                    IPEndPoint theRemoteEndPoint = (IPEndPoint)theClientSocket.RemoteEndPoint;
+                    var theMessage = theClientSocket.ReceiveMessage();
+                    Console.WriteLine("接收到消息: " + theMessage);
+                    Console.WriteLine("send消息: " + theMessage);
+                    theClientSocket.SendMessage(theRemoteEndPoint.Address + ":" + theRemoteEndPoint.Port + "");
+                    Console.WriteLine("send消息: " + theMessage);
+                    Thread.Sleep(1000);
+                }
+
+            }
+
+        }
+
         /// <summary>
         /// 客户端发送消息处理
         /// </summary>
@@ -133,71 +168,18 @@ namespace TcpServer.Service
         }
 
         /// <summary>
-        /// 客户端接收消息处理
-        /// </summary>
-        /// <param name="theSocket"></param>
-        private void RunReceiveClientThread(Socket theSocket)
-        {
-            var theClientSocket = theSocket;
-            if (theClientSocket != null)
-            {
-                var hasReceive = false;
-                while (true)
-                {
-                    IPEndPoint theRemoteEndPoint = (IPEndPoint)theClientSocket.RemoteEndPoint;
-                    var theMessage = theClientSocket.ReceiveMessage();
-                    Console.WriteLine("接收到消息: " + theMessage);
-                    Console.WriteLine("send消息: " + theMessage);
-                    theClientSocket.SendMessage(theRemoteEndPoint.Address + ":" + theRemoteEndPoint.Port + "");
-                    Console.WriteLine("send消息: " + theMessage);
-                    // theClientSocket.ReceiveAsync(theRemoteEndPoint.Port + "");
-                    if (hasReceive == false)
-                    {
-                        hasReceive = true;
-                        this.TestClientConnect(theRemoteEndPoint);
-                    }
-                    Thread.Sleep(1000);
-                }
-
-            }
-
-        }
-
-        private void TestClientConnect(IPEndPoint Address)
-        {
-            Task.Factory.StartNew(() =>
-            {
-                Console.WriteLine("开始连接客户端");
-                var theNewSocket = new Socket(Address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-                IPEndPoint ipEndPoint = new IPEndPoint(IPAddress.Any, this.theServerPort);
-                theNewSocket.SetSocketOption(SocketOptionLevel.Socket, SocketOptionName.ReuseAddress, true);
-                theNewSocket.Bind(ipEndPoint);
-                Console.WriteLine("开始连接客户端bind sucess");
-                theNewSocket.Connect(Address);
-                Console.WriteLine("开始连接客户端 connect success");
-                theNewSocket.SendMessage("服务器发送的消息！");
-                Console.WriteLine("向客户端发送消息!");
-                theNewSocket.Close();
-            });
-
-        }
-        /// <summary>
         ///  释放实例
         /// </summary>
         public override void Dispose()
         {
-            if (this.theListenThread != null)
-            {
-                this.theListenThread.Interrupt();
-            }
+            base.Dispose();
+          
             if (this.keepWatchThread != null)
             {
                 this.keepWatchThread.Interrupt();
+                this.keepWatchThread = null;
             }
-            if (this.theServiceSocket != null)
-            {
-                this.theServiceSocket.Close();
-            }
+           
         }
 
     }

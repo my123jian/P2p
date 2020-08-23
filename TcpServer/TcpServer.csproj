@@ -16,4 +16,13 @@
     <PackageReference Include="ZXing.Net" Version="0.16.4" />
     <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
   </ItemGroup>
+  <ItemGroup>
+    <None Remove="归档.zip" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Model\" />
+    <Folder Include="Service\" />
+    <Folder Include="Helper\" />
+    <Folder Include="Client\" />
+  </ItemGroup>
 </Project>

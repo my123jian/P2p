@@ -1,4 +1,5 @@
 ﻿using System;
+using TcpServer.Model;
 
 namespace TcpServer
 {
@@ -8,11 +9,19 @@ namespace TcpServer
         {
             try
             {
-                Console.WriteLine("开始启动任务");
-                //var theService = new ServerService();
-                var theClient = new ClientService("47.88.169.123");
-                theClient.Start();
-                Console.WriteLine("启动任务成功");
+                ByteBuffer buffer = new ByteBuffer();
+                for(var i = 0; i < 1000; i++)
+                {
+                    buffer.Append(new byte[1024], 0, 1024);
+                }
+
+                var theDatas = buffer.ToBytes();
+                //new SocketTest().TestConnectTimeOut("www.baidu.com");
+                //Console.WriteLine("开始启动任务");
+                //var theService = new UdpServerService();
+                //var theClient = new UdpClientServer("47.88.169.123");
+                //theClient.Start();
+                //Console.WriteLine("启动任务成功");
             }
             catch (Exception ex)
             {

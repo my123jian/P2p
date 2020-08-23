@@ -9,8 +9,13 @@ namespace TcpServer.Helper
     /// </summary>
     public static class JsonHelper
     {
-
-        public static string toJson<T>(T Data) where T: class, new()
+        /// <summary>
+        /// 模型转换为json字符串
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="Data"></param>
+        /// <returns></returns>
+        public static string ToJson<T>(T Data) where T: class, new()
         {
             if (Data == null)
             {
@@ -20,8 +25,13 @@ namespace TcpServer.Helper
             return JsonConvert.SerializeObject(Data);
             //return theObject.ToString();
         }
-
-        public static T fromJson<T>(string theJson) where T : class, new()
+        /// <summary>
+        /// 字符串转对象
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="theJson"></param>
+        /// <returns></returns>
+        public static T FromJson<T>(string theJson) where T : class, new()
         {
             if (string.IsNullOrWhiteSpace(theJson))
             {
@@ -30,7 +40,6 @@ namespace TcpServer.Helper
             try
             {
                return JsonConvert.DeserializeObject<T>(theJson);
-             
 
             }
             catch (Exception ex)

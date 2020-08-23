@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
 using System.Text;
+using TcpServer.Helper;
 
 namespace TcpServer
 {
@@ -20,7 +21,7 @@ namespace TcpServer
         /// <param name="Data"></param>
         public static void Send<T>(this Socket Socket, T Data) where T:class,new()
         {
-            var theSendMesssage = JsonHelper.toJson(Data);
+            var theSendMesssage = JsonHelper.ToJson(Data);
             Socket.SendMessage(theSendMesssage);
             //todo
         }
@@ -33,7 +34,7 @@ namespace TcpServer
         public static T Recv<T>(this Socket Socket) where T : class, new()
         {
             var theMessage = Socket.ReceiveMessage();
-            return JsonHelper.fromJson<T>(theMessage);
+            return JsonHelper.FromJson<T>(theMessage);
             //todo
         }
         /// <summary>
@@ -43,7 +44,7 @@ namespace TcpServer
         /// <param name="Command"></param>
         public static void SendCommand(this Socket Socket,RequestCommand Command)
         {
-            var theSendMesssage = JsonHelper.toJson(Command);
+            var theSendMesssage = JsonHelper.ToJson(Command);
             Socket.SendMessage(theSendMesssage);
             //todo
         }
@@ -54,7 +55,7 @@ namespace TcpServer
         /// <param name="Command"></param>
         public static void SendCommand(this Socket Socket, ResponseCommand Command)
         {
-            var theSendMesssage = JsonHelper.toJson(Command);
+            var theSendMesssage = JsonHelper.ToJson(Command);
             Socket.SendMessage(theSendMesssage);
             //todo
         }
@@ -66,7 +67,7 @@ namespace TcpServer
         public static ResponseCommand ReceiveServiceCommand(this Socket Socket)
         {
             var theMessage = Socket.ReceiveMessage();
-            return JsonHelper.fromJson<ResponseCommand>(theMessage);
+            return JsonHelper.FromJson<ResponseCommand>(theMessage);
         }
         /// <summary>
         /// 接收客户端的命令
@@ -76,7 +77,7 @@ namespace TcpServer
         public static RequestCommand ReceiveClientCommand(this Socket Socket)
         {
             var theMessage = Socket.ReceiveMessage();
-            return JsonHelper.fromJson<RequestCommand>(theMessage);
+            return JsonHelper.FromJson<RequestCommand>(theMessage);
         }
 
         /// <summary>

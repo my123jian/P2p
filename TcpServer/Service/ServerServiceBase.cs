@@ -135,8 +135,14 @@ namespace TcpServer.Service
         {
             if (this.ListenThread != null) {
                 this.ListenThread.Interrupt();
+                this.ListenThread = null;
             }
-            
+            if (this.ServerSocket != null && this.ServerSocket.Connected)
+            {
+                this.ServerSocket.Close();
+                this.ServerSocket.Dispose();
+                this.ServerSocket = null;
+            }
             //throw new NotImplementedException();
         }
     }
