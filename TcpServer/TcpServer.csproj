@@ -10,7 +10,7 @@
     <Compile Remove="ServiceMain.cs" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Newtonsoft.Json" Version="12.0.2" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.12" />
     <PackageReference Include="log4net" Version="2.0.8" />
     <PackageReference Include="ZXing.Net" Version="0.16.4" />
